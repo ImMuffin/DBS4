@@ -20,4 +20,26 @@ Následne má svoj registračný `email` a `password`. Taktiež má svoj `nick` 
 
 Hráči taktiež môžu vytvárať klany. Každý klan može mať neobmedzený počet členov ale každý hráč môže byť iba v jednom klane. Klan obsahuje identifikátor `clan id` ktorý spolu s `name` tvorí *unique* názov pre daný klan. Každý klan si taktiež môže vytvoriť *roles* pre svojich členov. V klane si môžu hráči písať v skupinovom chate kde každý hráč vidí každú správu.
 
-Každý hráč má svoje herné postavy. S každou postavou si hráč vytvára aj novú hru. Postava (`character`), má svoje `character id` aby sa viacero hráčových postáv mohlo volať rovnako. Následne majú už spomínaný `name`. Postava má taktiež `class`, na základe ktorého sa jej nastaví počiatočný `health`, `attack` a `defense`. Podľa `class` sa postave budú zvyšovať *stats* a  odomykať `abilities`. Tieto majú vlastný `name`, level na ktorom sa odomknú `unlock level`, `damage` ako aj zvyšovanie poškodenia podľa levelov `damage scaling`. Niektoré môžu mať aj `effect`, ktorý sa aplikuje po ich použití. *Stats* sa však nezvyšujú postave iba podľa levelov ale aj podľa predmetov `item` ktoré počas hrania nájde. Tie sa najprv uložia do inventáru postavy `inventory` a následne ich može hráč použiť. Naraz može mať hráč aktivované iba 2 predmety. Každý predmet má svoj názov `name`, popis `description`, cenu `price`, za ktorú môže hráč predať daný predmet na trhu a efekt `effect`, ktorý má daný predmet na hráča.
+Každý hráč má svoje herné postavy. S každou postavou si hráč vytvára aj novú hru. Postava (`character`), má svoje `character id` aby sa viacero hráčových postáv mohlo volať rovnako. Následne majú už spomínaný `name`. Postava má taktiež `class`, na základe ktorého sa jej nastaví počiatočný `health`, `attack` a `defense`. Podľa `class` sa postave budú zvyšovať *stats* a  odomykať `abilities`. Tieto majú vlastný `name`, level na ktorom sa odomknú `unlock level`, `damage` ako aj zvyšovanie poškodenia podľa levelov `damage scaling`. Niektoré môžu mať aj `effect`, ktorý sa aplikuje po ich použití. 
+
+*Stats* sa však nezvyšujú postave iba podľa levelov ale aj podľa predmetov `item` ktoré počas hrania nájde. Tie sa najprv uložia do inventáru postavy `inventory` a následne ich može hráč použiť. Naraz može mať hráč aktivované iba 2 predmety. Každý predmet má svoj názov `name`, popis `description`, cenu `price`, za ktorú môže hráč predať daný predmet na trhu a efekt `effect`, ktorý má daný predmet na hráča.
+
+Každá postava existuje v samostatnej hre `game` teda každá nová postava začína hru od začiatku. Hra da delí na levely `levels`. Každý level je samostatná mapa. Každá táto mapa má špeciálnych nepriateľov `enemy` a NPCčka `quest giver`.
+
+Nepriatelia majú svoj názov `name`, pozíciu `location` a `level`, život `health`, poškodenie `damage`a obranu `defense` ktoré sa počítajú z levelu nepriatela. Hráč za ich zabitie dostane odmenu `death reward`. Nepriatelia sa môžu objaviť iba ak sú splnené ich podmienky `spawn conditions`. Tie môžu byť minimálny/maximálny level postavy, splnenie predošlej úlohy `prev. quest` alebo zabitie špecifickej príšery `parent monster`. Všetky tieto informácie sa nachádzajú v jednotlivých *log*-och.
+
+NPCčka majú meno `name` a pozíciu na ktorej sa nachádzajú `location`. Pre hráča majú minimálne jeden *quest*. Tieto majú svoj `name`, `descritption`, cieľ, ktorý musí hráč splniť `goal`, odmenu `reward` a odomykaciu podmienku, ktorá sprístupní danú úlohu hráčovi. Táto podmienka môže byť zabitie istého počtu nepriatelov `monsters killed`, nájdenie predmetu `item found` alebo dosiahnuttie dostatočného levelu `user level achieved`.
+
+Hra tiež obsahuje zápisy všetkého čo hráč urobí.
+
+ ### Tabuľky
+
+`Item log` obsahuje zápis o všetkých predmetoch ktoré hráč našiel. Obsahuje ich názov `name`, `level`, cenu `price`, čas nájdenia `time`, miesto nájdenia `location` a spôsob použitia `use`.
+
+`Quest log` obsahuje zápisy všetkých úloch ktoré hráč plní/splnil. Obsahuje ich názov `name`, začiatok úlohy `quest started`, koniec úlohy, `quest ended`, čas, koľko hráč danú úlohu plnil `time taken`, odmenu za splnenie `reward` a miesto, kde hráč danú úlohu splnil `location`.
+
+`Damage log` obsahuje zápisy o všetkom poškodení ktoré sa stalo v hre. Obsajuhe meno útočníka `attacker`, meno obrancu `defender`, základ poškodenia `damage base`, poškodenia zastavené obrancom `damage mitigated`, poškodenie ktoré obranca dostal `damage applied`, miesto kde sa boj odohráva `location` a čas kedy sa to stalo `time`.
+
+`Kill log` obsahuje zápisy o všetkom, čo hráč zabil. Obsahuje názov nepriatela `enemy`, zdroj posledného poškodenia `last ability`, začiatok, dĺžku a koniec boja (`battle start`, `battle length` a `battle end`), odmenu `reward`, a na koniec miesto a čas (`location` a `time`).
+
+`Effect log` obsahuje záznamy o všetkých efektoch. Tiež obsahuje záznam o útočníkovi a obrancovi (`attacker`, `defender`), efekte, ktorý bol aplikovaný `effect applied`, dĺžke toho efektu `effect length` a miesto a čas zápisu (`location`, `time`).
