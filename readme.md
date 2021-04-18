@@ -1,5 +1,5 @@
 # Projekt 4
-Autori: Matej Rastocky a Ondrej Ambruš
+Autori: Matej Rástocky a Ondrej Ambruš
 
 ---
 
