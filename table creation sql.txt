@@ -166,8 +166,8 @@ CREATE TABLE IF NOT EXISTS quest_givers(
 CREATE TABLE IF NOT EXISTS quest(
     quest_id uuid PRIMARY KEY UNIQUE NOT NULL,
     quest_giver_id uuid REFERENCES quest_givers (quest_giver_id) NOT NULL,
-    name varchar(64),
-    description varchar(256),
+    name varchar(64) NOT NULL,
+    description varchar(256) NOT NULL,
     monsters_killed bigint,
     item_found uuid REFERENCES item (item_id),
     character_level int,
