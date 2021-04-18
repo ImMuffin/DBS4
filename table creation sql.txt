@@ -1,27 +1,27 @@
 CREATE TABLE IF NOT EXISTS "user" (
     player_id uuid PRIMARY KEY NOT NULL UNIQUE,
-    nick text,
-    email text,
-    pass text,
+    nick varchar(64),
+    email varchar(320),
+    pass varchar(64),
     account_created date
 );
 
 CREATE TABLE IF NOT EXISTS facebook_login (
     player_id uuid REFERENCES "user" (player_id) NOT NULL UNIQUE,
-    access_token text,
+    access_token varchar(256),
     expires_in bigint,
-    signed_request text,
-    user_id text
+    signed_request varchar(256),
+    user_id varchar(256)
 );
 
 CREATE TABLE IF NOT EXISTS google_login (
     player_id uuid REFERENCES "user" (player_id) NOT NULL UNIQUE,
-    real_name text,
+    real_name varchar(128),
     icon_url text,
-    jwt_issuer text,
+    jwt_issuer varchar(256),
     google_account_id bigint,
-    azp text,
-    client_id text,
+    azp varchar(256),
+    client_id varchar(256),
     token_creation_date bigint,
     token_expiration_date bigint
 );
@@ -34,21 +34,21 @@ CREATE TABLE IF NOT EXISTS chat (
 
 CREATE TABLE IF NOT EXISTS message (
     chat_id uuid REFERENCES chat (chat_id) NOT NULL,
-    time_sent timestamp,
-    message_body text
+    time_sent timestamp NOT NULL,
+    message_body varchar(256)
 );
 
 CREATE TABLE IF NOT EXISTS clan (
     clan_id uuid PRIMARY KEY NOT NULL UNIQUE,
     creator_id uuid REFERENCES "user" (player_id) NOT NULL UNIQUE,
-    name text,
+    name varchar(64),
     roles text
 );
 
 CREATE TABLE IF NOT EXISTS clan_member (
     clan_id uuid REFERENCES clan (clan_id) NOT NULL,
     player_id uuid REFERENCES "user" (player_id) NOT NULL UNIQUE,
-    role text
+    role varchar(32)
 );
 
 CREATE TABLE IF NOT EXISTS clan_chat (
@@ -59,56 +59,56 @@ CREATE TABLE IF NOT EXISTS clan_chat (
 
 CREATE TABLE IF NOT EXISTS clan_message (
     chat_id uuid REFERENCES clan_chat (chat_id) NOT NULL,
-    time_sent timestamp,
-    message_body text
+    time_sent timestamp NOT NULL,
+    message_body varchar(256)
 );
 
 CREATE TABLE IF NOT EXISTS contact (
     player_id uuid REFERENCES "user" (player_id) NOT NULL,
     contact_id uuid REFERENCES "user" (player_id) NOT NULL,
-    status text
+    status varchar(16)
 );
 
 CREATE TABLE IF NOT EXISTS class (
     class_id uuid PRIMARY KEY UNIQUE NOT NULL,
-    name text,
-    base_health bigint,
-    health_scaling bigint,
-    base_health_regen bigint,
-    health_regen_scaling bigint,
-    base_attack bigint,
-    attack_scaling bigint,
-    base_defense bigint,
-    defense_scaling bigint,
-    base_mana bigint,
-    mana_scaling bigint,
-    mana_regen bigint,
-    mana_regen_scaling bigint
+    name varchar(32),
+    base_health int,
+    health_scaling int,
+    base_health_regen int,
+    health_regen_scaling int,
+    base_attack int,
+    attack_scaling int,
+    base_defense int,
+    defense_scaling int,
+    base_mana int,
+    mana_scaling int,
+    mana_regen int,
+    mana_regen_scaling int
 );
 
 CREATE TABLE IF NOT EXISTS character (
     character_id uuid PRIMARY KEY UNIQUE NOT NULL,
     player_id uuid REFERENCES "user" (player_id) NOT NULL,
-    name text,
+    name varchar(64),
     class_id uuid REFERENCES class (class_id) NOT NULL,
-    level bigint,
+    level int,
     xp bigint,
     xp_next_lvl bigint,
-    health bigint,
-    attack bigint,
-    defense bigint,
+    health int,
+    attack int,
+    defense int,
     location point
 );
 
 CREATE TABLE IF NOT EXISTS ability (
     ability_id uuid PRIMARY KEY UNIQUE NOT NULL,
     class_id uuid REFERENCES class (class_id) NOT NULL,
-    name text,
-    unlock_level bigint,
-    damage bigint,
-    damage_scaling bigint,
-    mana_cost bigint,
-    mana_cost_scaling bigint,
+    name varchar(32),
+    unlock_level int,
+    damage int,
+    damage_scaling int,
+    mana_cost int,
+    mana_cost_scaling int,
     effect text,
     effect_duration interval
 );
@@ -116,18 +116,18 @@ CREATE TABLE IF NOT EXISTS ability (
 CREATE TABLE IF NOT EXISTS storage(
     storage_id uuid PRIMARY KEY NOT NULL UNIQUE,
     character_id uuid REFERENCES character (character_id) NOT NULL,
-    name text,
+    name varchar(64),
     size point,
     weight_limit bigint
 );
 
 CREATE TABLE IF NOT EXISTS item(
     item_id uuid PRIMARY KEY NOT NULL UNIQUE,
-    name text,
-    description text,
+    name varchar(64),
+    description varchar(256),
     price money,
-    effect text,
-    size bigint,
+    effect varchar(16),
+    size int,
     weight bigint
 );
 
@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS item_level_instance(
 
 CREATE TABLE IF NOT EXISTS quest_givers(
     quest_giver_id uuid PRIMARY KEY UNIQUE NOT NULL,
-    name text,
+    name varchar(64),
     level uuid REFERENCES level (level_id),
     location point
 );
@@ -166,29 +166,29 @@ CREATE TABLE IF NOT EXISTS quest_givers(
 CREATE TABLE IF NOT EXISTS quest(
     quest_id uuid PRIMARY KEY UNIQUE NOT NULL,
     quest_giver_id uuid REFERENCES quest_givers (quest_giver_id) NOT NULL,
-    name text,
-    description text,
+    name varchar(64),
+    description varchar(256),
     monsters_killed bigint,
     item_found uuid REFERENCES item (item_id),
-    character_level bigint,
+    character_level int,
     reward json,
     previous_quest uuid REFERENCES quest (quest_id)
 );
 
 CREATE TABLE IF NOT EXISTS spawn_conditions(
     sc_id uuid PRIMARY KEY UNIQUE NOT NULL,
-    min_player_level bigint,
-    max_player_level bigint,
+    min_player_level int,
+    max_player_level int,
     level uuid REFERENCES level (level_id),
     previous_quest uuid REFERENCES quest (quest_id)
 );
 
 CREATE TABLE IF NOT EXISTS enemy(
     enemy_id uuid PRIMARY KEY UNIQUE NOT NULL,
-    name text,
-    base_health bigint,
-    base_damage bigint,
-    base_defense bigint,
+    name varchar(64),
+    base_health int,
+    base_damage int,
+    base_defense int,
     base_death_reward json,
     spawn_condition uuid REFERENCES spawn_conditions (sc_id)
 );
@@ -200,9 +200,9 @@ CREATE TABLE IF NOT EXISTS enemy_instance(
     enemy_instance_id uuid PRIMARY KEY NOT NULL UNIQUE,
     enemy_id uuid REFERENCES enemy (enemy_id),
     location point,
-    health bigint,
-    damage bigint,
-    defense bigint,
+    health int,
+    damage int,
+    defense int,
     death_reward json,
     level bigint
 );
@@ -213,7 +213,7 @@ CREATE TABLE IF NOT EXISTS item_log(
     level_id uuid REFERENCES level (level_id),
     time timestamp DEFAULT now(),
     location point,
-    use text
+    use varchar(16)
 );
 
 CREATE TABLE IF NOT EXISTS quest_log(
@@ -230,9 +230,9 @@ CREATE TABLE IF NOT EXISTS damage_taken_log(
     no uuid PRIMARY KEY UNIQUE NOT NULL,
     character_id uuid REFERENCES character (character_id),
     enemy_id uuid REFERENCES enemy (enemy_id),
-    damage_base bigint,
-    damage_mitigated bigint,
-    damage_taken bigint,
+    damage_base int,
+    damage_mitigated int,
+    damage_taken int,
     location point,
     time timestamp DEFAULT now()
 );
@@ -241,9 +241,9 @@ CREATE TABLE IF NOT EXISTS damage_dealt_log(
     no uuid PRIMARY KEY UNIQUE NOT NULL,
     character_id uuid REFERENCES character (character_id),
     enemy_id uuid REFERENCES enemy (enemy_id),
-    damage_base bigint,
-    damage_mitigated bigint,
-    damage_taken bigint,
+    damage_base int,
+    damage_mitigated int,
+    damage_taken int,
     location point,
     time timestamp DEFAULT now()
 );
@@ -256,9 +256,9 @@ CREATE TABLE IF NOT EXISTS kill_log(
     battle_start timestamp,
     battle_end timestamp DEFAULT now(),
     battle_length interval,
-    damage_taken_by_player bigint,
-    damage_dealt_by_player bigint,
-    damage_mitigated_by_player bigint,
+    damage_taken_by_player int,
+    damage_dealt_by_player int,
+    damage_mitigated_by_player int,
     reward json,
     location point,
     time timestamp DEFAULT now()
@@ -268,7 +268,7 @@ CREATE TABLE IF NOT EXISTS effect_log(
     no uuid PRIMARY KEY UNIQUE NOT NULL,
     character_id uuid REFERENCES character (character_id),
     enemy_id uuid REFERENCES enemy (enemy_id),
-    effect text,
+    effect varchar(16),
     effect_duration interval,
     location point,
     time timestamp DEFAULT now()
