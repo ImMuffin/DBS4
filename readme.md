@@ -150,7 +150,7 @@ CREATE TABLE IF NOT EXISTS ability (
 
 *Stats* sa však nezvyšujú postave iba podľa levelov ale aj podľa predmetov (`item`) ktoré počas hrania nájde. Tie sa najprv uložia do inventáru postavy (`inventory`) a následne ich može hráč použiť. Naraz može mať hráč aktivované iba 2 predmety. Každý predmet má svoj názov (`name`), popis (`description`), cenu (`price`), za ktorú môže hráč predať daný predmet na trhu a efekt (`effect`), ktorý má daný predmet na hráča. Taktiež obsahuje informácie o veľkosti (`size`) a váhe (`weight`) predmetu.
 
-``` postgres
+``` PLpgSQL
 CREATE TABLE IF NOT EXISTS item(
     item_id uuid PRIMARY KEY NOT NULL UNIQUE,
     name varchar(64),
