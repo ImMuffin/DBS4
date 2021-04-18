@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS clan_message (
 
 Každý hráč má svoje herné postavy. S každou postavou si hráč vytvára aj novú hru. Postava (`character`), má svoje `character id` aby sa viacero hráčových postáv mohlo volať rovnako. Následne majú už spomínané meno (`name`). Postava má taktiež triedu (`class`), na základe ktorého sa jej nastaví počiatočný živort (`health`), útok (`attack`) a obrana (`defense`). Podľa triedy sa postave budú zvyšovať *stats* a  odomykať schopnosti (`abilities`). Tieto majú vlastné meno (`name`), level na ktorom sa odomknú (`unlock level`), poškodenie (`damage`), zvyšovanie poškodenia podľa levelov (`damage scaling`), manu potrebnú na ich použitie *v prípade čarodejníka* (`mana_cost`) a jej zvyšovanie s levelmi (`mana_cost_scaling`). Niektoré schopnosti môžu mať aj efekt (`effect`) a dĺžku daného efektu (`effect_duration`), ktorý sa aplikuje po ich použití.
 
-``` postgres
+``` sql
 CREATE TABLE IF NOT EXISTS character (
     character_id uuid PRIMARY KEY UNIQUE NOT NULL,
     player_id uuid REFERENCES "user" (player_id) NOT NULL,
@@ -150,7 +150,7 @@ CREATE TABLE IF NOT EXISTS ability (
 
 *Stats* sa však nezvyšujú postave iba podľa levelov ale aj podľa predmetov (`item`) ktoré počas hrania nájde. Tie sa najprv uložia do inventáru postavy (`inventory`) a následne ich može hráč použiť. Naraz može mať hráč aktivované iba 2 predmety. Každý predmet má svoj názov (`name`), popis (`description`), cenu (`price`), za ktorú môže hráč predať daný predmet na trhu a efekt (`effect`), ktorý má daný predmet na hráča. Taktiež obsahuje informácie o veľkosti (`size`) a váhe (`weight`) predmetu.
 
-``` PLpgSQL
+``` sql
 CREATE TABLE IF NOT EXISTS item(
     item_id uuid PRIMARY KEY NOT NULL UNIQUE,
     name varchar(64),
