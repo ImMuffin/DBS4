@@ -3,18 +3,57 @@ Autor: Ondrej Ambruš
 
 ---
 
-## Názov:
+## Názov: DUNGEON ATTACK
 
 ## Popis navrhu
 Ide o hru kde sa hlavná postava musí prebojovať krajinou ktorá bola zakliata zlým čarodejníkom. Tá je teraz plná príšer a uveznených ľudí ktorý potrebujú hrdinovu pomoc.
 
 Používateľ sa najprv musí zaregistrovať. Môže tak urobiť priamo mailom alebo pomocou Google/Facebook.
-Po vytvorení účtu si hráč nastaví `heslo` a `nick` ktorý bude vidideľný pre ostatných hráčov v hre.
-Následne si môže vytvoriť postavu. Vyberie si `meno` pre svoju postavu. Potom si vyberie jednu z `class` *Warrior*, *Assassin*, *Archer*, *Mage*. Každá `class` má iné počiatočné *stats*. *Warrior* má najviac života, *Assassin* najviac poškodenia, *Archer* môže útočiť na diaľku a *Mage* používa magické útoky ktoré aplikujú rôzne efekty. Každá postava začína na svojej farme `level`-i 1 s 0 `XP` a jediným `item` a to motykou. Následne sa musí prebojovať cez lesy, katakomby, zamrznutú krajinu, močiare a púšť až ku hradu, v ktorom sa čarodejník ukrýva. Každá z týchto oblastí má vlastný typ nepriateľov. Čím ďalej je hráč v danom leveli tým viac druhov nepriateľov sa odomyká...
+Po vytvorení účtu si hráč nastaví heslo `pass` a prezývku `nick` ktorý bude vidideľný pre ostatných hráčov v hre.
+Následne si môže vytvoriť postavu. Vyberie si meno `name` pre svoju postavu. Potom si vyberie jednu z tried `class` napr. *Warrior*, *Assassin*, *Archer*, *Mage*. Každá trieda má iné počiatočné *stats*. *Warrior* má najviac života, *Assassin* najviac poškodenia, *Archer* môže útočiť na diaľku a *Mage* používa magické útoky ktoré aplikujú rôzne efekty. Každá postava začína na farme s `level`-om 1 s 0 `XP` a jediným predmetom `item` a to motykou. 
+
+![Hero image](/img/DbS1.png)
+
+Následne sa musí prebojovať cez lesy, katakomby, zamrznutú krajinu, močiare a púšť až ku hradu, v ktorom sa čarodejník ukrýva. Každá z týchto oblastí má vlastný typ nepriateľov. Čím ďalej je hráč v danom leveli tým viac druhov nepriateľov sa odomyká...
 
 ## Popis modelu
-Základom celého modelu je `user`. Každý user má vlastnú `id` by mohlo byť aj viacero hráčov s rovnakým menom.
+Základom celého modelu je `user`. Každý user má vlastnú `id` aby mohlo byť aj viacero hráčov s rovnakým menom.
 Následne má svoj registračný `email` a `password`. Taktiež má svoj `nick` podľa ktorého v kombinácií s `id` ho budú poznať iný hráči.
+
+``` postgres
+CREATE TABLE IF NOT EXISTS "user" (
+    player_id uuid PRIMARY KEY NOT NULL UNIQUE,
+    nick varchar(64),
+    email varchar(320),
+    pass varchar(64),
+    account_created date
+);
+```
+
+### Google a Facebook login
+V prípade, že používateľ chce použiť na prihlásenie **Facebook** alebo **Google**, môže tak urobiť. Databáza si uloží všetky potrebné informácie, ktoré *API* príslušnej stránky vráti.
+
+``` postgres
+CREATE TABLE IF NOT EXISTS facebook_login (
+    player_id uuid REFERENCES "user" (player_id) NOT NULL UNIQUE,
+    access_token varchar(256),
+    expires_in bigint,
+    signed_request varchar(256),
+    user_id varchar(256)
+);
+
+CREATE TABLE IF NOT EXISTS google_login (
+    player_id uuid REFERENCES "user" (player_id) NOT NULL UNIQUE,
+    real_name varchar(128),
+    icon_url text,
+    jwt_issuer varchar(256),
+    google_account_id bigint,
+    azp varchar(256),
+    client_id varchar(256),
+    token_creation_date bigint,
+    token_expiration_date bigint
+);
+```
 
 `User` má svoj `contact` list. Na ňom sú všetci hráči s ktorými sa daný `user` kontaktoval alebo ktorý kontaktovali jeho. Takto kontaktovať sa môžu cez `chat`. Každý hráč má samostatný `chat` s ostatnými hráčmi. `Chat` obsahuje správy `message`. Tie obsahujú informáciu komu sú smerované (`to`), kto danú správu poslal (`from`), obsah danej správy (`message body`) a čas odoslania danej správy (`time`).
 
