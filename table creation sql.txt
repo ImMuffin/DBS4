@@ -273,3 +273,12 @@ CREATE TABLE IF NOT EXISTS effect_log(
     location point,
     time timestamp DEFAULT now()
 );
+
+CREATE TABLE IF NOT EXISTS area(
+    area_id uuid PRIMARY KEY UNIQUE NOT NULL,
+    level_id uuid REFERENCES level (level_id),
+    name varchar(64) NOT NULL,
+    description varchar(256),
+    area_area box,
+    location point
+);

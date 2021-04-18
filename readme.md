@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS clan_message (
 ---
 
 ### Postava
-Každý hráč má svoje herné postavy. S každou postavou si hráč vytvára aj novú hru. Postava (`character`), má svoje `character id` aby sa viacero hráčových postáv mohlo volať rovnako. Následne majú už spomínané meno (`name`). Postava má taktiež triedu (`class`), na základe ktorého sa jej nastaví počiatočný živort (`health`), útok (`attack`) a obrana (`defense`). Podľa triedy sa postave budú zvyšovať *stats* a  odomykať schopnosti (`abilities`). Tieto majú vlastné meno (`name`), level na ktorom sa odomknú (`unlock level`), poškodenie (`damage`), zvyšovanie poškodenia podľa levelov (`damage scaling`), manu potrebnú na ich použitie *v prípade čarodejníka* (`mana_cost`) a jej zvyšovanie s levelmi (`mana_cost_scaling`). Niektoré schopnosti môžu mať aj efekt (`effect`) a dĺžku daného efektu (`effect_duration`), ktorý sa aplikuje po ich použití.
+Každý hráč má svoje herné postavy. S každou postavou si hráč vytvára aj novú hru. Postava (`character`), má svoje `character id` aby sa viacero hráčových postáv mohlo volať rovnako. Následne majú už spomínané meno (`name`). Postava má taktiež triedu (`class`), na základe ktorého sa jej nastaví počiatočný živort (`health`), útok (`attack`) a obrana (`defense`). Podľa triedy sa postave budú zvyšovať *stats* a  odomykať schopnosti (`ability`). Tieto majú vlastné meno (`name`), level na ktorom sa odomknú (`unlock level`), poškodenie (`damage`), zvyšovanie poškodenia podľa levelov (`damage scaling`), manu potrebnú na ich použitie *v prípade čarodejníka* (`mana_cost`) a jej zvyšovanie s levelmi (`mana_cost_scaling`). Niektoré schopnosti môžu mať aj efekt (`effect`) a dĺžku daného efektu (`effect_duration`), ktorý sa aplikuje po ich použití.
 
 ``` sql
 CREATE TABLE IF NOT EXISTS character (
@@ -357,7 +357,31 @@ CREATE TABLE IF NOT EXISTS effect_log(
 ## Príkladné scenáre
 
 ### Vytvorenie účtu
-Hráč si vytvorí účet s 
+
+Hráč si chce založiť účet v hre. Na začiatok má na výber z prihlásenia pomocou emailu, **Google** účtu alebo **Facebook** účtu. 
++ V prípade použitia emailu si hráč zvolí heslo a následne overí email pomocou potvrdzovacieho emailu. Až následne môže pokračovať do poslednej časti registrácie.
++ V prípade použitia **Google** alebo **Facebook** prihlásenia sa hráč prihlási do danej služby ktorá pomocou *API* v vráti prihlasovací token. Tento sa uloží do príslušnej databázy.
+
+Následne si hráč zvolí svoju prezývku, ktorú bude používať v hre. Týmto úspešne dokončí registráciu, všetky príslušné údaje sa v tomto bode uložia do databázy a hráč môže začať hrať.
+
+### Vytvorenie postavy
+
+Pri vytváraní postavy si hráč na obrazovke zvolí triedu svojej postavy a jej meno. Po potvrdení výberu sa z tabuľky `class` vytiahnú informácie o danej triede a zapíšu sa do tabuľky `character`. Táto tabuľka sa avšak používa iba na uloženie aktuálneho stavu postavy a postupu hráča. Všetky ostatné informácie ako napr. maximálny život sa vždy počítajú z tabuľky `class`. Z takto vytvorenou postavou môže hráč pokračovať do hry.
+
+### Pohyb v hre
+
+Hráč sa v hre pohybuje pomocou myšky. Pohybuje sa v štvorcovej mriežke podobne ako pri šachu. Preto sa pozícia ukladá ako `point` v tejto mriežke. Všetci nepriatelia a predmety zaberajú jedno takéto políčko. Pri stúpení na nepriateľa alebo predmet s nimi hráč automaticky interaguje. 
+
++ [V prípade nepriateľa sa otvorí nová *šachovnica* na ktorej sú umiestnený iba hráč a nepriateľ.](###boj)
++ V prípade predmetu si ho postava vloží do inventáru pokiaľ má postačujúce miesto. V takomto prípade sa tiež spraví zápis do tabuľky `item log`
+
+### Boj
+
+Boj prebieha na samostatnej ploche. Pohyb funguje rovnako ako v hre avšak tu môže hráč používať svoje schopnosti na boj. Samotný boj je rozdelený na kolá (*Turn based*). Po každom kole sa spraví zápis do tabuliek poškodenia a efektov. V prípade konca boja sa spraví zápis aj do tabuľky `kill log`.
+
+#### Útoky
+
+Pri použití útoku sa pou
 
 
 ---
