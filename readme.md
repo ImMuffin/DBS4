@@ -5,7 +5,7 @@ Autori: Matej Rástocký a Ondrej Ambruš
 
 ## Názov: DUNGEON ATTACK
 
-## Popis navrhu
+## Popis návrhu
 Ide o hru kde sa hlavná postava musí prebojovať krajinou ktorá bola zakliata zlým čarodejníkom. Tá je teraz plná príšer a uveznených ľudí ktorý potrebujú hrdinovu pomoc.
 
 Používateľ (`user`) sa najprv musí zaregistrovať. Môže tak urobiť priamo mailom alebo pomocou Google/Facebook.
@@ -14,7 +14,7 @@ Následne si môže vytvoriť postavu. Vyberie si meno (`name`) pre svoju postav
 
 ![Hero image](/img/DbS1.png)
 
-Následne sa musí prebojovať cez lesy, katakomby, zamrznutú krajinu, močiare a púšť až ku hradu, v ktorom sa čarodejník ukrýva. Každá z týchto oblastí má vlastný typ nepriateľov. Čím ďalej je hráč v danom leveli tým viac druhov nepriateľov sa odomyká...
+Následne sa musí prebojovať cez lesy, katakomby, zamrznutú krajinu, močiare a púšť až ku hradu, v ktorom sa čarodejník ukrýva. Každá z týchto oblastí má vlastný typ nepriateľov. Čím ďalej je hráč v danom leveli tým viac druhov nepriateľov sa odomyká. Náš hrdina avšak tiež zosilnieva. Zbiera nové predmety a naberá levely. Otázkou ostáva, či sa na konci svojou silou vyrovná mocnému čarodejníkovi alebo podľahne čiernej mágií.
 
 ---
 
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS "user" (
 
 ---
 
-### Google a Facebook login
+### Google a Facebook prihlásenie
 V prípade, že používateľ chce použiť na prihlásenie **Facebook** alebo **Google**, môže tak urobiť. Databáza si uloží všetky potrebné informácie, ktoré vráti *API* príslušnej stránky.
 
 ``` sql
@@ -64,13 +64,19 @@ CREATE TABLE IF NOT EXISTS google_login (
 ---
 
 ### Chat
-Používateľ má svoj zoznam kontaktov (`contact`). Na ňom sú všetci hráči s ktorými sa daný používateľ kontaktoval alebo ktorý kontaktovali jeho. Takto kontaktovať sa môžu cez `chat`. Každý dvaja hráči majú samostatný `chat`. `Chat` obsahuje `id` druhého hráča (`other_side`). Samotné správy sú na tento `chat` naviazané pomocou `id`. Tie obsahujú informáciu kedy boli odoslané (`time_sent`), a obsah danej správy (`message body`).
+Používateľ má svoj zoznam kontaktov (`contact`). Na ňom sú všetci hráči s ktorými sa daný používateľ kontaktoval alebo ktorý kontaktovali jeho. Tento zoznam taktiež obsahuje hráčov ktorých hráč zablokoval, toto sa označuje cez `status` napr. *friends*, *blocked* atď. Takto kontaktovať sa môžu cez `chat`. Každý dvaja hráči majú samostatný `chat`. `Chat` obsahuje `id` druhého hráča (`other_side`). Samotné správy sú na tento `chat` naviazané pomocou `id`. Tie obsahujú informáciu kedy boli odoslané (`time_sent`), a obsah danej správy (`message body`).
 
 ``` sql
 CREATE TABLE IF NOT EXISTS chat (
     chat_id uuid PRIMARY KEY NOT NULL UNIQUE,
     player_id uuid REFERENCES "user" (player_id) NOT NULL,
     other_side uuid REFERENCES "user" (player_id) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS contact (
+    player_id uuid REFERENCES "user" (player_id) NOT NULL,
+    contact_id uuid REFERENCES "user" (player_id) NOT NULL,
+    status varchar(16)
 );
 
 CREATE TABLE IF NOT EXISTS message (
@@ -82,7 +88,7 @@ CREATE TABLE IF NOT EXISTS message (
 
 ---
 
-### Clan
+### Klan
 
 Hráči taktiež môžu vytvárať klany (`clan`). Každý klan može mať neobmedzený počet členov ale každý hráč môže byť iba v jednom klane. Klan obsahuje identifikátor (`clan id`) ktorý spolu s menom klanu (`name`) tvorí unikátny názov pre daný klan napr. *postgres_slayers #5432*.
 Každý klan si taktiež môže vytvoriť role (`roles`) pre svojich členov. V klane si môžu hráči písať v skupinovom chate kde každý hráč vidí každú správu.
@@ -189,6 +195,32 @@ Každá postava existuje v samostatnej hre (`game`) teda každá nová postava z
 
 ![Logical diagram for level building](/img/diag1.png)
 
+``` sql
+
+CREATE TABLE IF NOT EXISTS game(
+    game_id uuid PRIMARY KEY UNIQUE NOT NULL,
+    character_id uuid REFERENCES character (character_id),
+    level_id uuid REFERENCES level (level_id)
+);
+
+CREATE TABLE IF NOT EXISTS level(
+    level_id uuid PRIMARY KEY NOT NULL UNIQUE,
+    map text,
+    starting_point point,
+    end_point point,
+    enemy_spawn_points path
+);
+
+CREATE TABLE IF NOT EXISTS area(
+    area_id uuid PRIMARY KEY UNIQUE NOT NULL,
+    level_id uuid REFERENCES level (level_id),
+    name varchar(64) NOT NULL,
+    description varchar(256),
+    area_area box,
+    location point
+);
+```
+
 ---
 
 ### Nepriatelia
@@ -261,6 +293,30 @@ CREATE TABLE IF NOT EXISTS quest(
 );
 ```
 
+---
+
+### Inventár
+Inventár je v tabuľkách definovaný ako `storage`. Teda nemusí ísť iba o batoh postavy ale aj o napr. vrecká, bedne a iné predmety ktoré si náš hrdina čarovne uviaže na chrbát. Samotná tabuľka obsahuje id úložného priestoru (`storage id`), postavy ktorej daný priestor patrí(`character_id`), názov úložného predmetu(`name`), jeho internú veľkosť (`size`) a váhový limit (`weight_limit`).
+
+``` sql
+CREATE TABLE IF NOT EXISTS storage(
+    storage_id uuid PRIMARY KEY NOT NULL UNIQUE,
+    character_id uuid REFERENCES character (character_id) NOT NULL,
+    name varchar(64),
+    size point,
+    weight_limit bigint
+);
+
+CREATE TABLE IF NOT EXISTS item(
+    item_id uuid PRIMARY KEY NOT NULL UNIQUE,
+    name varchar(64),
+    description varchar(256),
+    price money,
+    effect varchar(16),
+    size int,
+    weight bigint
+);
+```
 ---
 
  ### Tabuľky
@@ -381,8 +437,40 @@ Boj prebieha na samostatnej ploche. Pohyb funguje rovnako ako v hre avšak tu m�
 
 #### Útoky
 
-Pri použití útoku sa pou
+Pri použití útoku sa všetky informácie načítajú z tabuľky `ability`. Následne sa táto schopnosť vyvolá na hernej ploche. Jej tvar je určený pomocou dvojrozmerného poľa `cast shape` a aktuálneho otočenia postavy. Pokiaľ je nepriateľ zachytený v tomto území, dostane poškodenie. 
 
+V prípade, že útok má byť vyslaný 3 políčka rovno pred postavu, pole `cast shape` bude vyzerať takto.
+
+|  - | -  | O | -  | -  |
+|---|---|---|---|---|
+| -  | -  | x | -  | -  |
+|  - | -  | x | -  | -  |
+| -  |  - | x | -  | -  |
+
+![Full logical diagram](/img/catdead1.png)
+![Full logical diagram](/img/catdead2.png)
+
+### Štatistiky
+
+Do štatistických tabuľiek sa robia zápisy vždy, keď hráč vykoná súvisiacu akciu. 
++ Pri bojových tabuľkách sa spraví zápis po každom kole boja.
++ Do tabuľky predmetov sa spraví zápis vždy, keď hráč interaguje s predmetom (zdvihnutie, predaj atď.)
++ ...
+
+Zo zozbieraných informácií v štatistických tabuľkách sa hráčovi môžu udelovať ocenenia za dosiahnuté úspechy poprípade neúspechy. Niektoré z nich môžu byť: 
+
++ Tu to začína!
+    + Zabi prvú príšeru.
+
++ Oh no!
+    + Predaj najlepší meč v hre.
+
++ Veterán
+    + Dostaň 100 000 poškodenia.
+
+#### Plnenie úloh
+
+Splnenie úloh pridelených hráčovi počas prechádzania jednotlivých levelov sa tiež dá vyhodnotiť pomocou štatistických tabuľiek. Na príklad v prípade, že hráč dostane za úlohu zabiť 4 prekliate žaby ale on bol aktívny a tieto žaby už zabil nemusí tak urobiť znova. Úloha sa automaticky berie ako splnená.
 
 ---
 
@@ -397,3 +485,5 @@ Pri použití útoku sa pou
 ![Full logical diagram](/physical&#32;diagram.png)
 
 ---
+
+Žiadny z obrázkov nesúvisí priamo s projektom. Ide iba o inšpiráciu zozbieranú počas mnohých rokov hrania RPG hier.

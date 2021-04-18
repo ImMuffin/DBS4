@@ -13,6 +13,7 @@ DROP TABLE quest;
 DROP TABLE quest_givers;
 DROP TABLE item_level_instance;
 DROP TABLE game;
+DROP TABLE area;
 DROP TABLE level;
 DROP TABLE item_inventory_instance;
 DROP TABLE item;
